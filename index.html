@@ -1,0 +1,535 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: "M PLUS Rounded 1c", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        /* 進度條容器（固定在頂部） */
+        #progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.06);
+            z-index: 9999;
+            pointer-events: none;
+            transition: opacity 300ms ease;
+        }
+
+        /* 實際進度條 */
+        #progress-bar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80, #06b6d4);
+            box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+            transition: width 120ms linear;
+        }
+
+        /* 隱藏時的樣式 */
+        #progress-container.hidden {
+            opacity: 0;
+        }
+
+        .file-upload {
+            display: none;
+        }
+
+        .custom-file-upload {
+            top: 20px;
+            left: 20px;
+            border: 1px solid #ccc;
+            display: block;
+            position: fixed;
+            padding: 6px 12px;
+            cursor: pointer;
+            background: white;
+        }
+
+        #best,
+        #recent-new {
+            margin-top: 60px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .pic {
+            position: relative;
+            display: flex;
+            container-type: inline-size;
+        }
+
+        .backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            filter: blur(4px) brightness(0.8);
+            z-index: -8;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+        }
+
+        .pic img {
+            width: 50%;
+            height: auto;
+            display: block;
+            box-shadow: 4px 0px 4px -3px black;
+        }
+
+        .score {
+            box-sizing: border-box;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 34%;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-size: 6cqw;
+            text-align: left;
+            padding: 4px;
+        }
+
+        .name {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 50%;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 1px black;
+            box-shadow: 0px 2px 0px white;
+            font-size: 7cqw;
+            box-sizing: border-box;
+            text-align: center;
+            padding: 4px;
+            height: 45%;
+            overflow-y: hidden;
+            z-index: -1;
+        }
+
+        .level {
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            bottom: 0;
+            right: 50%;
+            width: 16%;
+            height: 32%;
+            color: white;
+            border-width: 1cqw;
+            border-color: white;
+            border-style: solid;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+            font-size: 8cqw;
+            font-weight: bold;
+        }
+
+        .dec {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            position: absolute;
+            bottom: 0;
+            right: 50%;
+            width: 6%;
+            height: 27%;
+            color: white;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+            font-size: 6cqw;
+            font-weight: bold;
+        }
+
+        .plus {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            bottom: 20%;
+            right: 50%;
+            width: 7%;
+            height: 10%;
+            color: white;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+            font-size: 7cqw;
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        .rating {
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            bottom: 23%;
+            right: 5%;
+            width: 40%;
+            height: 26%;
+            font-size: 7cqw;
+            color: white;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 4px black inset;
+            border-radius: 5000px;
+            background: rgb(39 39 39 / 70%);
+            font-style: italic;
+        }
+
+        #des {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 6px 12px;
+        }
+
+        .textRating {
+            font-family: "Arimo", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 700;
+            font-style: normal;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 25%;
+            height: 24%;
+            background: linear-gradient(0deg, #10BFEA 4%, #023999, #2C47F8);
+            font-size: 8cqw;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .textRating::after {
+            display: flex;
+            position: absolute;
+            content: attr(data-rating);
+            font-size: 8cqw;
+            color: transparent;
+            -webkit-text-stroke: 0.8cqw white;
+            text-shadow: 0 0 4px white;
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="progress-container" class="hidden" aria-hidden="true">
+        <div id="progress-bar"></div>
+    </div>
+    <div id="best"></div>
+    <div id="recent-new"></div>
+    <label for="json" class="custom-file-upload">
+        Custom Upload
+    </label>
+    <input id="json" type="file" class="file-upload" />
+    <select name="" id="des">
+        <option value="0">plus only</option>
+        <option value="1">decimals only</option>
+        <option value="2">both on</option>
+    </select>
+</body>
+<script>
+    (function () {
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+
+        function showProgress() {
+            progressContainer.classList.remove('hidden');
+            progressContainer.style.opacity = '1';
+        }
+
+        function hideProgressDelayed(t = 300) {
+            // 小延遲讓使用者看到 100%
+            setTimeout(() => {
+                progressContainer.style.opacity = '0';
+                // 完全隱藏後把寬度歸零，為下一次使用做好準備
+                setTimeout(() => { progressBar.style.width = '0%'; }, t);
+            }, t);
+        }
+
+        function setProgress(pct) {
+            if (pct === "err") {
+                progressBar.style.background = 'linear-gradient(90deg, #f87171, #ef4444)';
+                progressBar.style.boxShadow = '0 0 8px rgba(239,68,68,0.4)';
+                hideProgressDelayed(1200);
+            } else {
+                // 恢復正常顏色
+                progressBar.style.background = 'linear-gradient(90deg, #4ade80, #06b6d4)';
+                progressBar.style.boxShadow = '0 0 8px rgba(6,182,212,0.4)';
+                pct = Math.max(0, Math.min(100, pct));
+                progressBar.style.width = pct + '%';
+                if (pct >= 100) {
+                    hideProgressDelayed();
+                }
+            }
+
+        }
+
+        // 監聽滾動，顯示頁面滾動進度
+        function updateScrollProgress() {
+            const doc = document.documentElement;
+            const scrollTop = doc.scrollTop || document.body.scrollTop;
+            const scrollHeight = doc.scrollHeight || document.body.scrollHeight;
+            const clientHeight = doc.clientHeight || window.innerHeight;
+            const max = scrollHeight - clientHeight;
+            if (max <= 0) return; // 無需更新
+            const pct = (scrollTop / max) * 100;
+            showProgress();
+            setProgress(pct);
+        }
+
+        window.addEventListener('scroll', () => {
+            // 使用 requestAnimationFrame 優化頻率
+            window.requestAnimationFrame(updateScrollProgress);
+        }, { passive: true });
+
+        // 以下整合原本的 fetch，並以模擬進度回報載入階段
+        const main = "https://dp4p6x0xfi5o9.cloudfront.net/chunithm/";
+        const pic = "img/cover/";
+        const pic_m = "img/cover-m/";
+        const url = "data.json";
+
+        // 支援單一 URL 或多個 URL 同時 fetch，並以每筆模擬進度加總成整體進度
+        function fetchWithProgress(urls) {
+            showProgress();
+            setProgress(10);
+
+            const urlList = Array.isArray(urls) ? urls.slice() : [urls];
+            const count = urlList.length;
+            const progresses = new Array(count).fill(0);
+            const timers = new Array(count).fill(null);
+
+            function updateAggregate() {
+                const sum = progresses.reduce((a, b) => a + b, 0);
+                const avg = sum / count;
+                setProgress(avg);
+            }
+
+            const promises = urlList.map((u, idx) => {
+                progresses[idx] = 6; updateAggregate();
+                timers[idx] = setInterval(() => {
+                    progresses[idx] = Math.min(90, progresses[idx] + Math.random() * 4);
+                    updateAggregate();
+                }, 120);
+
+                return fetch(u).then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok: ' + u);
+                    return response.json();
+                }).then(data => {
+                    if (timers[idx]) { clearInterval(timers[idx]); timers[idx] = null; }
+                    progresses[idx] = 100; updateAggregate();
+                    return data;
+                }).catch(err => {
+                    if (timers[idx]) { clearInterval(timers[idx]); timers[idx] = null; }
+                    progresses[idx] = 100; updateAggregate();
+                    throw err;
+                });
+            });
+
+            return Promise.all(promises).then(results => {
+                setProgress(100);
+                console.log(results);
+                return results;
+            }).catch(err => {
+                setProgress(100);
+                console.error('Error fetching one or more resources:', err);
+                throw err;
+            });
+        }
+
+
+
+        document.getElementById('json').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            showProgress();
+            setProgress(10);
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                setProgress(50);
+                try {
+                    const data = JSON.parse(e.target.result);
+                    setProgress(100);
+                    console.log(data);
+
+                    doSomeThingWithData(data);
+                } catch (err) {
+                    setProgress("err");
+
+                    console.error('Error parsing JSON:', err);
+                    alert("這可能不是有效的 JSON 檔案！\nThe file may not be a valid JSON!\n" + err.message);
+                }
+            };
+            reader.onerror = function () {
+                console.error('Error reading file:', reader.error);
+            };
+            reader.readAsText(file);
+        });
+
+        //https://chunithm-net-eng.com/mobile/images/honor_bg_platina.png
+
+        // 自動啟動一次 fetch（保留原有行為）
+        let songData;
+        fetchWithProgress([main + url]).then(results => { songData = results[0]; }).catch(() => { });
+
+        function doSomeThingWithData(data) {
+            const showDes = parseInt(document.getElementById('des').value);
+
+            const best = document.getElementById('best');
+            const recentNew = document.getElementById('recent-new');
+            best.innerHTML = '';
+            recentNew.innerHTML = '';
+
+            function renderList(listName, containerEl) {
+                const list = Array.isArray(data[listName]) ? data[listName] : [];
+                list.forEach(song => {
+                    const img = new Image();
+                    const find = (songData && songData.songs) ? songData.songs.find(s => s.title === song.title) : null;
+                    const songDF = (find && find.sheets) ? find.sheets.find(d => d.difficulty === (song.difficulty || '').toLowerCase()) : null;
+                    const imgUrl = main + pic_m + (find ? find.imageName : '');
+                    img.src = imgUrl;
+                    img.alt = song.title;
+
+                    let finRating = songDF ? songDF.internalLevelValue : 0,
+                        rating_tx = "";
+                    const sgC = song.score || 0;
+                    if (sgC >= 1009000) {
+                        finRating += 2.15;
+                        rating_tx = "SSS+";
+                    } else if (sgC >= 1007500) {
+                        finRating += 2.0 + (sgC - 1007500) / 100 * 0.01;
+                        rating_tx = "SSS";
+                    } else if (sgC >= 1005000) {
+                        rating_tx = "SS+";
+                        finRating += 1.5 + (sgC - 1005000) / 50 * 0.01;
+                    } else if (sgC >= 1000000) {
+                        finRating += 1.0 + (sgC - 1000000) / 100 * 0.01;
+                        rating_tx = "SS";
+                    } else if (sgC >= 990000) {
+                        finRating += 0.6 + (sgC - 990000) / 250 * 0.01;
+                        rating_tx = "S+";
+                    } else if (sgC >= 975000) {
+                        finRating += (sgC - 975000) / 250 * 0.01;
+                        rating_tx = "S";
+                    } else if (sgC >= 950000) {
+                        finRating -= 1.67 + (sgC - 950000) / 150 * 0.01;
+                        rating_tx = "AAA";
+                    } else if (sgC >= 925000) {
+                        finRating -= 3.34 + (sgC - 925000) / 150 * 0.01;
+                        rating_tx = "AA";
+                    } else if (sgC >= 900000) {
+                        finRating -= 5.0 + (sgC - 900000) / 150 * 0.01;
+                        rating_tx = "A";
+                    } else if (sgC >= 800000) {
+                        finRating = (finRating - 5.0) / 2;
+                        finRating += (sgC - 800000) / (2000 / ((songDF && songDF.internalLevelValue) ? (songDF.internalLevelValue - 5) : 1)) * 0.01;
+                        rating_tx = "BBB";
+                    } else {
+                        finRating = 0;
+                        rating_tx = "C/D";
+                    }
+
+                    let levelBackground;
+                    switch (song.difficulty) {
+                        case "Ultima":
+                            levelBackground = "linear-gradient(45deg, black 10%, #DF0F55 70%, black 75%)";
+                            break;
+                        case "Master":
+                            levelBackground = "linear-gradient(45deg, #8801F1 49%, #AE11FB 50%, #8801F1)";
+                            break;
+                        case "Expert":
+                            levelBackground = "linear-gradient(45deg, #ED001E 49%, #FF2A41 50%, #ED001E)";
+                            break;
+                        case "Advanced":
+                            levelBackground = "linear-gradient(45deg, #00A2FF 49%, #00FFD5 50%, #00A2FF)";
+                            break;
+                        case "Basic":
+                            levelBackground = "linear-gradient(45deg, #00FF41 49%, #005F00 50%, #00FF41)";
+                            break;
+                        default:
+                            levelBackground = "red";
+                            break;
+                    }
+
+                    const container = document.createElement('div'),
+                        score = document.createElement('div'),
+                        name = document.createElement('div'),
+                        level = document.createElement('div'),
+                        rating = document.createElement('div'),
+                        background = document.createElement('div'),
+                        plus = document.createElement('div'),
+                        dec = document.createElement('div'),
+                        textRating = document.createElement('div');
+
+                    score.className = "score";
+                    container.className = "pic";
+                    background.className = "backdrop";
+                    name.className = "name";
+                    level.className = "level";
+                    rating.className = "rating";
+                    plus.className = "plus";
+                    plus.textContent = "+";
+                    dec.className = "dec";
+                    textRating.className = "textRating";
+                    console.log(songDF.internalLevelValue, (songDF.levelValue % 1).toFixed(1).substring(1, 3));
+                    dec.textContent = (songDF.levelValue % 1).toFixed(1).substring(1, 3);
+
+                    background.style.background = `url(${imgUrl}) center / cover no-repeat`;
+
+                    if (songDF.level.includes("+") && showDes !== 1) container.appendChild(plus);
+
+                    score.textContent = song.score;
+                    name.textContent = song.title;
+                    level.textContent = songDF ? songDF.level.replace(/\+$/, '  ') : '';
+                    level.style.background = levelBackground;
+                    rating.textContent = (Math.floor(finRating * 100) / 100).toString().padEnd(5, "0");
+                    textRating.textContent = rating_tx;
+                    textRating.setAttribute('data-rating', rating_tx);
+
+                    if (showDes === 2 || (showDes === 1 && !(songDF.level.includes("+")))) {
+                        level.textContent = level.textContent.replace(/\ \ $/, '') + "  ";
+                    }
+
+                    container.appendChild(background);
+                    container.appendChild(name);
+                    container.appendChild(img);
+                    container.appendChild(score);
+                    container.appendChild(level);
+                    container.appendChild(rating);
+                    if (showDes === 2 || showDes === 1) container.appendChild(dec);
+                    container.appendChild(textRating);
+
+                    containerEl.appendChild(container);
+                });
+            }
+
+            renderList('best', best);
+            // 若 data 物件中有 recent 屬性就使用 'recent'，否則改用 'new'
+            const recentKey = (data && Object.prototype.hasOwnProperty.call(data, 'recent')) ? 'recent' : 'new';
+            renderList(recentKey, recentNew);
+        }
+
+    })();
+</script>
+
+</html>
