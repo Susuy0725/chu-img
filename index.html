@@ -57,8 +57,8 @@
             background: white;
         }
 
-        #best,
-        #recent-new {
+        #Best30Content,
+        #New20Content {
             margin-top: 60px;
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -196,6 +196,13 @@
             padding: 6px 12px;
         }
 
+        #language {
+            position: fixed;
+            top: 20px;
+            right: 200px;
+            padding: 6px 12px;
+        }
+
         .textRating {
             font-family: "Arimo", sans-serif;
             font-optical-sizing: auto;
@@ -231,20 +238,36 @@
 </head>
 
 <body>
+    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue-i18n@8/dist/vue-i18n.js"></script>
+    <script src="./i18n.js"></script>
+    <div id="app">
+        <label for="json" class="custom-file-upload">
+            {{ $t('uploadBtn') }}
+        </label>
+        <select name=language id="language" v-model="$i18n.locale">
+            <option value="en">English</option>
+            <option value="tw">繁體中文</option>
+        </select>
+        <select name="" id="des">
+            <option value="0">{{ $t('displayConstOptions.showConstant') }}</option>
+            <option value="1">{{ $t('displayConstOptions.showLevel') }}</option>
+            <option value="2">{{ $t('displayConstOptions.showBoth') }}</option>
+        </select>
+    </div>
     <div id="progress-container" class="hidden" aria-hidden="true">
         <div id="progress-bar"></div>
     </div>
-    <div id="best"></div>
-    <div id="recent-new"></div>
-    <label for="json" class="custom-file-upload">
-        Custom Upload
-    </label>
+    <div id="Best30">
+        <h1 id="B30_text"></h1>
+        <div id="Best30Content"></div>
+    </div>
+    <div id="New20">
+        <h1 id="N20_text"></h1>
+        <div id="New20Content"></div>
+    </div>
     <input id="json" type="file" class="file-upload" />
-    <select name="" id="des">
-        <option value="0">plus only</option>
-        <option value="1">decimals only</option>
-        <option value="2">both on</option>
-    </select>
+
 </body>
 <script>
     (function () {
@@ -395,10 +418,51 @@
         function doSomeThingWithData(data) {
             const showDes = parseInt(document.getElementById('des').value);
 
-            const best = document.getElementById('best');
-            const recentNew = document.getElementById('recent-new');
+            const best = document.getElementById('Best30Content');
+            const recentNew = document.getElementById('New20Content');
             best.innerHTML = '';
             recentNew.innerHTML = '';
+
+            function getRankingScore(sgC, songDF) {
+                let finRating = songDF ? songDF.internalLevelValue : 0,
+                    rating_tx = "";
+                if (sgC >= 1009000) {
+                    finRating += 2.15;
+                    rating_tx = "SSS+";
+                } else if (sgC >= 1007500) {
+                    finRating += 2.0 + (sgC - 1007500) / 100 * 0.01;
+                    rating_tx = "SSS";
+                } else if (sgC >= 1005000) {
+                    rating_tx = "SS+";
+                    finRating += 1.5 + (sgC - 1005000) / 50 * 0.01;
+                } else if (sgC >= 1000000) {
+                    finRating += 1.0 + (sgC - 1000000) / 100 * 0.01;
+                    rating_tx = "SS";
+                } else if (sgC >= 990000) {
+                    finRating += 0.6 + (sgC - 990000) / 250 * 0.01;
+                    rating_tx = "S+";
+                } else if (sgC >= 975000) {
+                    finRating += (sgC - 975000) / 250 * 0.01;
+                    rating_tx = "S";
+                } else if (sgC >= 950000) {
+                    finRating -= 1.67 + (sgC - 950000) / 150 * 0.01;
+                    rating_tx = "AAA";
+                } else if (sgC >= 925000) {
+                    finRating -= 3.34 + (sgC - 925000) / 150 * 0.01;
+                    rating_tx = "AA";
+                } else if (sgC >= 900000) {
+                    finRating -= 5.0 + (sgC - 900000) / 150 * 0.01;
+                    rating_tx = "A";
+                } else if (sgC >= 800000) {
+                    finRating = (finRating - 5.0) / 2;
+                    finRating += (sgC - 800000) / (2000 / ((songDF && songDF.internalLevelValue) ? (songDF.internalLevelValue - 5) : 1)) * 0.01;
+                    rating_tx = "BBB";
+                } else {
+                    finRating = 0;
+                    rating_tx = "C/D";
+                }
+                return { finRating, rating_tx };
+            }
 
             function renderList(listName, containerEl) {
                 const list = Array.isArray(data[listName]) ? data[listName] : [];
@@ -410,44 +474,8 @@
                     img.src = imgUrl;
                     img.alt = song.title;
 
-                    let finRating = songDF ? songDF.internalLevelValue : 0,
-                        rating_tx = "";
                     const sgC = song.score || 0;
-                    if (sgC >= 1009000) {
-                        finRating += 2.15;
-                        rating_tx = "SSS+";
-                    } else if (sgC >= 1007500) {
-                        finRating += 2.0 + (sgC - 1007500) / 100 * 0.01;
-                        rating_tx = "SSS";
-                    } else if (sgC >= 1005000) {
-                        rating_tx = "SS+";
-                        finRating += 1.5 + (sgC - 1005000) / 50 * 0.01;
-                    } else if (sgC >= 1000000) {
-                        finRating += 1.0 + (sgC - 1000000) / 100 * 0.01;
-                        rating_tx = "SS";
-                    } else if (sgC >= 990000) {
-                        finRating += 0.6 + (sgC - 990000) / 250 * 0.01;
-                        rating_tx = "S+";
-                    } else if (sgC >= 975000) {
-                        finRating += (sgC - 975000) / 250 * 0.01;
-                        rating_tx = "S";
-                    } else if (sgC >= 950000) {
-                        finRating -= 1.67 + (sgC - 950000) / 150 * 0.01;
-                        rating_tx = "AAA";
-                    } else if (sgC >= 925000) {
-                        finRating -= 3.34 + (sgC - 925000) / 150 * 0.01;
-                        rating_tx = "AA";
-                    } else if (sgC >= 900000) {
-                        finRating -= 5.0 + (sgC - 900000) / 150 * 0.01;
-                        rating_tx = "A";
-                    } else if (sgC >= 800000) {
-                        finRating = (finRating - 5.0) / 2;
-                        finRating += (sgC - 800000) / (2000 / ((songDF && songDF.internalLevelValue) ? (songDF.internalLevelValue - 5) : 1)) * 0.01;
-                        rating_tx = "BBB";
-                    } else {
-                        finRating = 0;
-                        rating_tx = "C/D";
-                    }
+                    let { finRating, rating_tx } = getRankingScore(sgC, songDF);
 
                     let levelBackground;
                     switch (song.difficulty) {
@@ -523,9 +551,30 @@
                 });
             }
 
+            function calculateAvg(listName, count) {
+                let total = 0;
+                const list = Array.isArray(data[listName]) ? data[listName] : [];
+                list.forEach(song => {
+                    // 找對應的 songDF
+                    const find = (songData && songData.songs) ? songData.songs.find(s => s.title === song.title) : null;
+                    const songDF = (find && find.sheets) ? find.sheets.find(d => d.difficulty === (song.difficulty || '').toLowerCase()) : null;
+                    const sgC = song.score || 0;
+                    console.log();
+                    total += Math.floor(getRankingScore(sgC, songDF).finRating * 100) / 100;
+                });
+                const avg = Math.floor((list.length > 0 ? total / count : 0) * 10**4) / 10**4;
+                console.log(`Avg of ${listName}:`, avg);
+                return avg;
+            }
+
+            B30 = document.getElementById('B30_text');
+            B30.innerHTML = `Best 30 Avg:${calculateAvg('best', 30)}`;
             renderList('best', best);
             // 若 data 物件中有 recent 屬性就使用 'recent'，否則改用 'new'
+
+            N20 = document.getElementById('N20_text');
             const recentKey = (data && Object.prototype.hasOwnProperty.call(data, 'recent')) ? 'recent' : 'new';
+            N20.innerHTML = `New 20 Avg:${calculateAvg(recentKey, 20)}`;
             renderList(recentKey, recentNew);
         }
 
