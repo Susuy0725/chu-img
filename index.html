@@ -15,6 +15,16 @@
             font-style: normal;
         }
 
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -10;
+        }
+
         /* 進度條容器（固定在頂部） */
         #progress-container {
             position: fixed;
@@ -46,29 +56,61 @@
             display: none;
         }
 
-        .custom-file-upload {
-            top: 20px;
-            left: 20px;
-            border: 1px solid #ccc;
-            display: block;
+        .btn-left-container {
             position: fixed;
+            top: 12px;
+            left: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-right-container {
+            position: fixed;
+            top: 12px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            margin-left: 10px;
+            border: 1px solid #ccc;
+            height: 36px;
+            display: block;
+            position: relative;
             padding: 6px 12px;
             cursor: pointer;
             background: white;
+            box-sizing: border-box;
         }
 
         #Best30Content,
         #New20Content {
-            margin-top: 60px;
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 16px;
+        }
+
+        #Best30 {
+            margin-top: 60px;
+        }
+
+        #B30_text,
+        #N20_text {
+            margin: 10px;
         }
 
         .pic {
             position: relative;
             display: flex;
             container-type: inline-size;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+            border-radius: 6px;
+            overflow: hidden;
+            z-index: 1;
         }
 
         .backdrop {
@@ -77,7 +119,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            filter: blur(4px) brightness(0.8);
+            filter: blur(6px) brightness(0.8);
             z-index: -8;
             clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
         }
@@ -174,7 +216,8 @@
             box-sizing: border-box;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-end;
+            padding-right: 5cqw;
             position: absolute;
             bottom: 23%;
             right: 5%;
@@ -189,17 +232,21 @@
             font-style: italic;
         }
 
-        #des {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 6px 12px;
+        .rating::after {
+            content: "Rating";
+            position: absolute;
+            bottom: 15%;
+            left: 5%;
+            font-size: 4cqw;
+            color: white;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+            font-style: italic;
         }
 
+        #des,
+        #pic-quality,
         #language {
-            position: fixed;
-            top: 20px;
-            right: 200px;
+            height: 36px;
             padding: 6px 12px;
         }
 
@@ -229,10 +276,77 @@
             content: attr(data-rating);
             font-size: 8cqw;
             color: transparent;
-            -webkit-text-stroke: 0.8cqw white;
+            -webkit-text-stroke: 0.9cqw white;
             text-shadow: 0 0 4px white;
             pointer-events: none;
+            background: linear-gradient(0deg, #FBECAF, transparent 70%);
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
             z-index: -1;
+        }
+
+        .fc_aj {
+            font-family: "Arimo", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 700;
+            font-style: normal;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 25.1%;
+            height: 24%;
+            background: linear-gradient(0deg, #10BFEA 4%, #023999, #2C47F8);
+            font-size: 8cqw;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .fc_aj::after {
+            display: flex;
+            position: absolute;
+            content: attr(data-fc_aj);
+            font-size: 8cqw;
+            color: transparent;
+            -webkit-text-stroke: 0.9cqw white;
+            text-shadow: 0 0 4px white;
+            pointer-events: none;
+            background: linear-gradient(0deg, #FBECAF, transparent 70%);
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            z-index: -1;
+        }
+
+        #app {
+            top: 0;
+            left: 0;
+            position: fixed;
+            z-index: 10;
+            background: linear-gradient(rgba(0, 0, 0, 0.4), transparent);
+            width: 100%;
+            height: 60px;
+        }
+
+        .player-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .player-info h1 {
+            margin: 0;
+            padding: 10px;
+            color: black;
+            background: white;
+            width: 50%;
         }
     </style>
 </head>
@@ -241,29 +355,48 @@
     <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
     <script src="https://unpkg.com/vue-i18n@8/dist/vue-i18n.js"></script>
     <script src="./i18n.js"></script>
+    <img src="https://sdvx.in/chunithm/chfiles/bg.jpg" alt="background" class="background">
+
     <div id="app">
-        <label for="json" class="custom-file-upload">
-            {{ $t('uploadBtn') }}
-        </label>
-        <select name=language id="language" v-model="$i18n.locale">
-            <option value="en">English</option>
-            <option value="tw">繁體中文</option>
-        </select>
-        <select name="" id="des">
-            <option value="0">{{ $t('displayConstOptions.showConstant') }}</option>
-            <option value="1">{{ $t('displayConstOptions.showLevel') }}</option>
-            <option value="2">{{ $t('displayConstOptions.showBoth') }}</option>
-        </select>
+        <div class="btn-left-container">
+            <label for="json" class="custom-file-upload btn">
+                {{ $t('uploadBtn') }}
+            </label>
+            <button id="regenerate-btn" class="btn">
+                {{ $t('regenerateBtn') }}
+            </button>
+        </div>
+        <div class="btn-right-container">
+            <select name=language id="language" v-model="$i18n.locale">
+                <option value="en">English</option>
+                <option value="tw">繁體中文</option>
+                <option value="ch">简体中文</option>
+            </select>
+            <select name="" id="pic-quality">
+                <option value="0">{{ $t('picQualityOptions.midQuality') }}</option>
+                <option value="1">{{ $t('picQualityOptions.highQuality') }}</option>
+            </select>
+            <select name="" id="des">
+                <option value="0">{{ $t('displayConstOptions.showConstant') }}</option>
+                <option value="1">{{ $t('displayConstOptions.showLevel') }}</option>
+                <option value="2">{{ $t('displayConstOptions.showBoth') }}</option>
+            </select>
+        </div>
     </div>
+
     <div id="progress-container" class="hidden" aria-hidden="true">
         <div id="progress-bar"></div>
     </div>
     <div id="Best30">
-        <h1 id="B30_text"></h1>
+        <div class="player-info">
+            <h1 id="player_name"></h1>
+            <h1 id="player_rating"></h1>
+        </div>
+        <h2 id="B30_text"></h2>
         <div id="Best30Content"></div>
     </div>
     <div id="New20">
-        <h1 id="N20_text"></h1>
+        <h2 id="N20_text"></h2>
         <div id="New20Content"></div>
     </div>
     <input id="json" type="file" class="file-upload" />
@@ -378,7 +511,7 @@
             });
         }
 
-
+        let data = null;
 
         document.getElementById('json').addEventListener('change', (event) => {
             const file = event.target.files[0];
@@ -391,7 +524,7 @@
             reader.onload = function (e) {
                 setProgress(50);
                 try {
-                    const data = JSON.parse(e.target.result);
+                    data = JSON.parse(e.target.result);
                     setProgress(100);
                     console.log(data);
 
@@ -416,12 +549,18 @@
         fetchWithProgress([main + url]).then(results => { songData = results[0]; }).catch(() => { });
 
         function doSomeThingWithData(data) {
+            const picQuality = parseInt(document.getElementById('pic-quality').value);
             const showDes = parseInt(document.getElementById('des').value);
+            const playerName = document.getElementById('player_name');
+            const playerRating = document.getElementById('player_rating');
 
             const best = document.getElementById('Best30Content');
             const recentNew = document.getElementById('New20Content');
             best.innerHTML = '';
             recentNew.innerHTML = '';
+
+            playerName.textContent = data.name || "notFound";
+            playerRating.textContent = data.rating || "0.00";
 
             function getRankingScore(sgC, songDF) {
                 let finRating = songDF ? songDF.internalLevelValue : 0,
@@ -470,7 +609,7 @@
                     const img = new Image();
                     const find = (songData && songData.songs) ? songData.songs.find(s => s.title === song.title) : null;
                     const songDF = (find && find.sheets) ? find.sheets.find(d => d.difficulty === (song.difficulty || '').toLowerCase()) : null;
-                    const imgUrl = main + pic_m + (find ? find.imageName : '');
+                    const imgUrl = main + (picQuality ? pic : pic_m) + (find ? find.imageName : '');
                     img.src = imgUrl;
                     img.alt = song.title;
 
@@ -489,10 +628,10 @@
                             levelBackground = "linear-gradient(45deg, #ED001E 49%, #FF2A41 50%, #ED001E)";
                             break;
                         case "Advanced":
-                            levelBackground = "linear-gradient(45deg, #00A2FF 49%, #00FFD5 50%, #00A2FF)";
+                            levelBackground = "linear-gradient(45deg, #F47600 49%, #FFAB1A 50%, #F47600)";
                             break;
                         case "Basic":
-                            levelBackground = "linear-gradient(45deg, #00FF41 49%, #005F00 50%, #00FF41)";
+                            levelBackground = "linear-gradient(45deg, #00A27F 49%, #09D68F 50%, #00A27F)";
                             break;
                         default:
                             levelBackground = "red";
@@ -507,7 +646,8 @@
                         background = document.createElement('div'),
                         plus = document.createElement('div'),
                         dec = document.createElement('div'),
-                        textRating = document.createElement('div');
+                        textRating = document.createElement('div'),
+                        fc_aj = document.createElement('div');
 
                     score.className = "score";
                     container.className = "pic";
@@ -519,7 +659,7 @@
                     plus.textContent = "+";
                     dec.className = "dec";
                     textRating.className = "textRating";
-                    console.log(songDF.internalLevelValue, (songDF.levelValue % 1).toFixed(1).substring(1, 3));
+                    fc_aj.className = "fc_aj";
                     dec.textContent = (songDF.levelValue % 1).toFixed(1).substring(1, 3);
 
                     background.style.background = `url(${imgUrl}) center / cover no-repeat`;
@@ -530,12 +670,14 @@
                     name.textContent = song.title;
                     level.textContent = songDF ? songDF.level.replace(/\+$/, '  ') : '';
                     level.style.background = levelBackground;
-                    rating.textContent = (Math.floor(finRating * 100) / 100).toString().padEnd(5, "0");
+                    rating.textContent = (Math.floor(finRating * 100) / 100).toString().padEnd(Math.floor(finRating).toString().length + 3, "0");
                     textRating.textContent = rating_tx;
                     textRating.setAttribute('data-rating', rating_tx);
+                    fc_aj.textContent = (song.isAllJustice ? "AJ" : (song.isFullCombo ? "FC" : ""));
+                    fc_aj.setAttribute('data-fc_aj', (song.isAllJustice ? "AJ" : (song.isFullCombo ? "FC" : "")));
 
                     if (showDes === 2 || (showDes === 1 && !(songDF.level.includes("+")))) {
-                        level.textContent = level.textContent.replace(/\ \ $/, '') + "  ";
+                        level.textContent = level.textContent.replace(/\ \ $/, '') + (songDF.level.length > 1 ? "  " : "");
                     }
 
                     container.appendChild(background);
@@ -544,6 +686,7 @@
                     container.appendChild(score);
                     container.appendChild(level);
                     container.appendChild(rating);
+                    container.appendChild(fc_aj);
                     if (showDes === 2 || showDes === 1) container.appendChild(dec);
                     container.appendChild(textRating);
 
@@ -562,21 +705,51 @@
                     console.log();
                     total += Math.floor(getRankingScore(sgC, songDF).finRating * 100) / 100;
                 });
-                const avg = Math.floor((list.length > 0 ? total / count : 0) * 10**4) / 10**4;
+                const avg = Math.floor((list.length > 0 ? total / count : 0) * 10 ** 4) / 10 ** 4;
                 console.log(`Avg of ${listName}:`, avg);
                 return avg;
             }
 
             B30 = document.getElementById('B30_text');
-            B30.innerHTML = `Best 30 Avg:${calculateAvg('best', 30)}`;
+            B30.innerHTML = "Best 30 Songs";
+            B30.setAttribute('data-b30', `Avg:${calculateAvg('best', 30)}`);
             renderList('best', best);
             // 若 data 物件中有 recent 屬性就使用 'recent'，否則改用 'new'
 
             N20 = document.getElementById('N20_text');
             const recentKey = (data && Object.prototype.hasOwnProperty.call(data, 'recent')) ? 'recent' : 'new';
-            N20.innerHTML = `New 20 Avg:${calculateAvg(recentKey, 20)}`;
+            N20.innerHTML = "New 20 Songs";
+            N20.setAttribute('data-n20', `Avg:${calculateAvg(recentKey, 20)}`);
             renderList(recentKey, recentNew);
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('regenerate-btn').addEventListener('click', (e) => {
+                if (e.ctrlKey) {
+                    fetch('./chunithm-player-data_test.json')
+                        .then(response => {
+                            if (!response.ok) throw new Error('Network response was not ok');
+                            return response.json(); // <- 必須回傳 Promise
+                        })
+                        .then(testData => {
+                            console.log("Loaded test data:", testData);
+                            doSomeThingWithData(testData);
+                        })
+                        .catch(err => {
+                            alert("無法載入測試檔案！\nCannot load test file!\n" + err.message);
+                            return null;
+                        });
+                } else {
+                    // 正常行為：使用上傳或先前的 data
+
+                    if (data) {
+                        doSomeThingWithData(data);
+                    } else {
+                        alert("請先上傳 JSON 檔案！\nPlease upload a JSON file first!");
+                    }
+                }
+            });
+        });
 
     })();
 </script>
