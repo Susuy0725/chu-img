@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Chunithm Best 30 image viewer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap" rel="stylesheet">
@@ -268,7 +268,8 @@
             padding: 6px 12px;
         }
 
-        .textRating, .fc_aj {
+        .textRating,
+        .fc_aj {
             font-family: "Arimo", sans-serif;
             font-optical-sizing: auto;
             font-weight: 700;
@@ -282,8 +283,8 @@
             height: 100%;
             font-size: 8cqw;
         }
-        
-        .textRating{
+
+        .textRating {
             left: 0;
             background: linear-gradient(0deg, #10BFEA 5%, #023999, #2C47F8);
             background-clip: text;
@@ -576,8 +577,14 @@
             best.innerHTML = '';
             recentNew.innerHTML = '';
 
+            const isRecent = Object.prototype.hasOwnProperty.call(data, 'recent');
+            console.log("Using " + (isRecent ? "'recent'" : "'new'") + " for New 20 Songs.");
+
             playerName.textContent = data.name || "notFound";
-            playerRating.textContent = (data.rating).toString().padEnd(Math.floor(parseFloat(data.rating)).toString().length + 3, "0") || "0.00";
+            const q = parseFloat(data.rating);
+            !q.toString().includes('.') ?
+                playerRating.textContent = q.toFixed(2) :
+                playerRating.textContent = q.toString().padEnd(Math.floor(q).toString().length + 3, "0") || "0.00";
 
             function getRankingScore(sgC, songDF) {
                 let finRating = songDF ? songDF.internalLevelValue : 0,
@@ -689,7 +696,10 @@
                     name.textContent = song.title;
                     level.textContent = songDF ? songDF.level.replace(/\+$/, '  ') : '';
                     level.style.background = levelBackground;
-                    rating.textContent = (Math.floor(finRating * 100) / 100).toString().padEnd(Math.floor(finRating).toString().length + 3, "0");
+                    const q = finRating;
+                    !q.toString().includes('.') ?
+                        rating.textContent = q.toFixed(2) :
+                        rating.textContent = (Math.floor(q * 100) / 100).toString().padEnd(Math.floor(q).toString().length + 3, "0");
                     textRating.textContent = rating_tx;
                     textRating.setAttribute('data-rating', rating_tx);
                     fc_aj.textContent = (song.isAllJustice ? "AJ" : (song.isFullCombo ? "FC" : ""));
@@ -739,8 +749,8 @@
 
             N20 = document.getElementById('N20_text');
             const recentKey = (data && Object.prototype.hasOwnProperty.call(data, 'recent')) ? 'recent' : 'new';
-            N20.innerHTML = "New 20 Songs";
-            N20.setAttribute('data-n20', `Avg:${calculateAvg(recentKey, 20)}`);
+            N20.innerHTML = isRecent ? "Recent 10 Songs" : "New 20 Songs";
+            N20.setAttribute('data-n20', `Avg:${calculateAvg(recentKey, isRecent ? 10 : 20)}`);
             renderList(recentKey, recentNew);
         }
 
